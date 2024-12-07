@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persistent Net Profit Tracker - 2025</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .month {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        td[contenteditable="true"] {
+            background-color: #fff9c4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Net Profit Tracker - 2025</h1>
+
+    <div id="months-container">
+        <script>
+            const months = [
+                "January", "February", "March", "April", "May", "June", 
+                "July", "August", "September", "October", "November", "December"
+            ];
+
+            const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+            months.forEach((month, index) => {
+                document.write(`
+                    <div class="month">
+                        <h2>${month}</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Revenue</th>
+                                    <th>Expense</th>
+                                    <th>Net Profit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${Array.from({ length: daysInMonth[index] }).map((_, day) => `
+                                    <tr>
+                                        <td>${day + 1}</td>
+                                        <td contenteditable="true" class="revenue" data-date="${month}-${day + 1}-revenue"></td>
+                                        <td contenteditable="true" class="expense" data-date="${month}-${day + 1}-expense"></td>
+                                        <td class="net-profit" data-date="${month}-${day + 1}-net-profit"></td>
+                                    </tr>
+                                `).join("")}
+                                <tr>
+                                    <td colspan="3"><strong>Monthly Net Profit</strong></td>
+                                    <td class="monthly-net-profit"><strong>0</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `);
+            });
+
+            // Function to calculate and update net profits
+            function calculateNetProfit() {
+                document.querySelectorAll('table').forEach(table => {
+                    const rows = table.querySelectorAll('tbody tr');
+                    let monthlyNetProfit = 0;
+
+                    rows.forEach(row => {
+                        const revenueCell = row.querySelector('.revenue');
+                        const expenseCell = row.querySelector('.expense');
+                        const netProfitCell = row.querySelector('.net-profit');
+
+                        if (revenueCell && expenseCell && netProfitCell) {
+                            const revenue = parseFloat(revenueCell.innerText.replace(/,/g, '')) || 0;
+                            const expense = parseFloat(expenseCell.innerText.replace(/,/g, '')) || 0;
+                            const netProfit = revenue - expense;
+
+                            netProfitCell.innerText = netProfit;
+                            monthlyNetProfit += netProfit;
+                        }
+                    });
+
+                    const monthlyNetProfitCell = table.querySelector('.monthly-net-profit strong');
+                    if (monthlyNetProfitCell) {
+                        monthlyNetProfitCell.innerText = monthlyNetProfit;
+                    }
+                });
+            }
+
+            // Save data to localStorage
+            function saveData() {
+                const cells = document.querySelectorAll('[contenteditable="true"]');
+                cells.forEach(cell => {
+                    localStorage.setItem(cell.dataset.date, cell.innerText);
+                });
+            }
+
+            // Load data from localStorage
+            function loadData() {
+                const cells = document.querySelectorAll('[contenteditable="true"]');
+                cells.forEach(cell => {
+                    const savedValue = localStorage.getItem(cell.dataset.date);
+                    if (savedValue) {
+                        cell.innerText = savedValue;
+                    }
+                });
+
+                // Recalculate Net Profit after loading data
+                calculateNetProfit();
+            }
+
+            // Add event listeners to save data and recalculate
+            document.addEventListener('input', (e) => {
+                if (e.target.classList.contains('revenue') || e.target.classList.contains('expense')) {
+                    calculateNetProfit();
+                    saveData();
+                }
+            });
+
+            // Load data on page load
+            window.onload = loadData;
+        </script>
+    </div>
+</body>
+</html>
